@@ -1,0 +1,15 @@
+@charset UTF-8;
+
+body {margin: 0px auto; padding: 0px; font: 12px Arial;}
+a {color: #15428B; text-decoration: none;}
+a:hover {color: #0000FF; text-decoration: underline;}
+a.btn-icon {padding-left: 1em;}
+a.btn-icon span.ui-icon {position: absolute; left: .5em;}
+
+.tab {width: 100%; border-collapse: collapse; border-spacing: 0px;}
+.tab thead th {border: 1px solid #eee; padding: .6em .2em; text-align: center;}
+.tab tbody td {border: 1px solid #eee; padding: .4em .2em; word-break: keep-all;}
+.tab .tcenter {text-align: center; overflow: hidden; word-break: break-all;}
+.tab .label {text-align: right; background-color: #F4F4FF;}
+.tab .break {word-break: break-all;}
+.tab textarea {word-break: break-all; width: 100%;}

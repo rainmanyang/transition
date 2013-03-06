@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta http-equiv="Cache-Control" content="no-cache" />
+		<title>告警信息</title>
+		<link rel="stylesheet" href="../styles/public.css" />
+		<link rel="stylesheet" href="../styles/start/jquery-ui-1.9.1.custom.css" />
+	</head>
+	<body>
+		<table>
+			<tr>
+				<td class="label"><label for="creatTimeStart">创建时间:</label></td>
+				<td colspan="3">
+					<input type="text" id="createTimeStart" class="ui-widget-content ui-corner-all" size="12" maxlength="10" style="padding: .4em .1em;" /> 
+					- <input type="text" id="createTimeEnd" class="ui-widget-content ui-corner-all" size="12" maxlength="10" style="padding: .4em .1em;" />
+				</td>
+			</tr>
+			<tr>
+				<td class="label"><label for="region">片区:</label></td>
+				<td>
+					<select id="region" class="ui-widget-content" style="padding: .4em .1em;" onchange="fetchRoom(this.value)">
+						<option value="">请选择...</option>
+					</select>
+				</td>
+				<td class="label"><label for="room">机房:</label></td>
+				<td>
+					<select id="room" class="ui-widget-content" style="padding: .4em .1em;">
+						<option value="">请选择...</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="label"><label for="type">类型:</label></td>
+				<td><select id="type" class="ui-widget-content" style="padding: .4em .1em;">
+						<option value="">请选择...</option>
+						<option value="1">正常</option>
+						<option value="2">告警</option>
+						<option value="3">故障</option>
+					</select>
+				</td>
+				<td class="label"><label for="status">状态:</label></td>
+				<td>
+					<select id="status" class="ui-widget-content" style="padding: .4em .1em;">
+						<option value="">请选择...</option>
+						<option value="1">打开</option>
+						<option value="2">已关闭</option>
+					</select>
+					<button><span class="ui-icon ui-icon-search" style="float:left;"></span>查询</button>
+				</td>
+			</tr>
+		</table>
+		<div style="margin: .1em;">
+		<table class="tab ui-widget ui-widget-content ui-corner-all">
+			<thead>
+				<tr class="ui-widget-header">
+					<th>信息内容</th>
+					<th>创建时间</th>
+					<th>所在机房</th>
+					<th>类型</th>
+					<th>是否发送</th>
+					<th>状态</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody id="msgContent">
+			</tbody>
+		</table>
+		</div>
+	</body>
+</html>
+<script src="../js/jquery-1.8.2.js"></script>
+<script src="../js/jquery-ui-1.9.1.custom.js"></script>
+<script src="../js/jquery.ui.datepicker-zh-CN.js"></script>
+<script language="javascript">
+	$.ajaxSetup({cache:false});
+	$("button").button().click(function() {
+		var _data = {createTimeStart: $("#createTimeStart").val(), createTimeEnd: $("#createTimeEnd").val(), regionId: $("#region").val(), roomSn: $("#room").val(), type: $("#type").val(), status: $("#status").val()};
+		search(_data);
+	});
+	$("#createTimeStart").datepicker({dateFormat: "yy-mm-dd"});
+	$("#createTimeEnd").datepicker({dateFormat: "yy-mm-dd"});
+	$.get("../../region/list.jhtml", function(data) {
+		var _r = $("#region");
+		$(data).each(function() {
+			$("<option value='" + this.id + "'>" + this.name + "</option>").appendTo(_r);
+		});
+	});
+	function fetchRoom(rid) {
+		var _r = $("#room");
+		while (_r.find("option").length > 1) {
+			_r.find("option:last").remove();
+		}
+		_r.selectedIndex = 0;
+		if (rid) {
+			$.get("../../room/list.jhtml?regionId=" + rid, function(data) {
+				$(data).each(function() {
+					$("<option value='" + this.sn + "'>" + this.name + "</option>").appendTo(_r);
+				});
+			});
+		}
+	}
+	
+	function rendeType(t) {
+		switch(t) {
+		case "1": return "正常";
+		case "2": return "告警";
+		case "3": return "故障";
+		default: return "未知";
+		}
+	}
+	function rendeOpe(data, index) {
+		var h = "<a href='javascript:void(0)' onclick='view(" + index + ")'>详情</a>";
+		if (data.status == "1") {
+			h += " | <a href='javascript:void(0)' onclick='closeWarning(" + index + ")'>关闭</a>";
+		}
+		return h;
+	}
+	var rowData = null;
+	function search(params) {
+		$.get("../../warning/list.jhtml", params, function(data) {
+			var _msgCtl = $("#msgContent");
+			_msgCtl.empty();
+			rowData = data;
+			$(data.content).each(function(i) {
+				var html = "<tr>\
+								<td>" + this.content + "</td>\
+								<td class='tcenter'>" + new Date(this.createTime).yyyyMMddHHmm() + "</td>\
+								<td class='tcenter'>" + this.room.name + "</td>\
+								<td class='tcenter'>" + rendeType(this.type) + "</td>\
+								<td class='tcenter'>" + (this.sendStatus == "0" ? "否" : (this.sendStatus == "1" ? "是" : "未知")) + "</td>\
+								<td class='tcenter'>" + (this.status == "1" ? "打开" : (this.sendStatus == "2" ? "关闭" : "未知")) + "</td>\
+								<td class='tcenter'>" + rendeOpe(this, i) + "</td>\
+							</tr>";
+				$(html).appendTo(_msgCtl);
+			});
+		});
+	}
+	Date.prototype.yyyyMMddHHmm = function() {
+		return this.getFullYear() + "-" + (this.getMonth() + 1) + "-" + this.getDate() + " " + this.getHours() + ":" + this.getMinutes();
+	}
+	search({});
+</script>
