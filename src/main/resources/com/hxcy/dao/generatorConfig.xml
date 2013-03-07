@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration >
+  <context id="context1" >
+    <jdbcConnection driverClass="oracle.jdbc.driver.OracleDriver" connectionURL="jdbc:oracle:thin:@192.168.40.118:1521:UNI" userId="transition" password="transition" />
+    <javaModelGenerator targetPackage="com.hxcy.entity" targetProject="transition" />
+    <sqlMapGenerator targetPackage="com.hxcy.mapper" targetProject="transition" />
+    <javaClientGenerator targetPackage="com.hxcy.dao" targetProject="transition" type="XMLMAPPER" />
+    <table schema="" tableName="CC_USER" domainObjectName="user">
+    </table>
+  </context>
+</generatorConfiguration>
